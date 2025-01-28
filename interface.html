@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot Interface</title>
+  <script>
+    let chatbotMinimized = false;
+
+    function toggleChatbot() {
+      const chatbot = document.getElementById('chatbot');
+      const toggleButton = document.getElementById('toggle-button');
+      chatbotMinimized = !chatbotMinimized;
+
+      if (chatbotMinimized) {
+        chatbot.style.display = 'none';
+        toggleButton.innerHTML = 'Open Chatbot';
+      } else {
+        chatbot.style.display = 'block';
+        toggleButton.innerHTML = 'Close Chatbot';
+      }
+    }
+
+    async function sendMessage() {
+      const userInput = document.getElementById('user-input').value.trim();
+      if (!userInput) return;
+
+      const chatArea = document.getElementById('chat-area');
+      chatArea.innerHTML += `<div class="user-message">You: ${userInput}</div>`;
+
+      // Call your chatbot API
+      try {
+        const response = await fetch('https://60a6-2409-40e0-21-79e8-9d13-cf2-f47b-a9e5.ngrok-free.app/chatbot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userInput }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          chatArea.innerHTML += `<div class="bot-message">Bot: ${data.response}</div>`;
+        } else {
+          chatArea.innerHTML += `<div class="bot-message">Bot: Sorry, there was an error with the server.</div>`;
+        }
+      } catch (error) {
+        chatArea.innerHTML += `<div class="bot-message">Bot: Could not connect to the server.</div>`;
+      }
+
+      document.getElementById('user-input').value = '';
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #toggle-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    #chatbot {
+      position: fixed;
+      bottom: 70px;
+      right: 20px;
+      width: 300px;
+      height: 400px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: none;
+      flex-direction: column;
+    }
+    #chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }
+    .user-message, .bot-message {
+      margin: 5px 0;
+    }
+    .user-message {
+      text-align: right;
+      color: blue;
+    }
+    .bot-message {
+      text-align: left;
+      color: green;
+    }
+    #chat-input {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    #user-input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 0;
+    }
+    #send-button {
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button id="toggle-button" onclick="toggleChatbot()">Open Chatbot</button>
+
+  <div id="chatbot">
+    <div id="chat-area"></div>
+    <div id="chat-input">
+      <input type="text" id="user-input" placeholder="Type your message here..." />
+      <button id="send-button" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</body>
+</html>
