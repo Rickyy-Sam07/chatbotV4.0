@@ -125,7 +125,7 @@ le = LabelEncoder()
 le.fit(intents)
 
 # Groq API key setup
-os.environ["GROQ_API_KEY"] = ""
+os.environ["GROQ_API_KEY"] = "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"
 
 # Define chatbot response functions
 def groq_response(user_input):
@@ -172,10 +172,10 @@ prompts_collection = db['prompts']
 admin_collection = db['admins']
 
 # Insert example admin credentials
-admin_collection.insert_one({
+'''admin_collection.insert_one({
     "username": "admin",
     "password": "password"  # Plaintext password (not recommended for production)
-})
+})'''
 
 # FastAPI app
 app = FastAPI()
