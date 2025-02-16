@@ -1,6 +1,6 @@
 import requests
 
-url = "https://60a6-2409-40e0-21-79e8-9d13-cf2-f47b-a9e5.ngrok-free.app/chatbot"
+url = "https://d7f1-2409-40e0-29-116d-19c-da48-f69f-cc4.ngrok-free.app/chatbot"
 headers = {"Content-Type": "application/json"}
 
 while True:
