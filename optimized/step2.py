@@ -64,7 +64,7 @@ class AdminCredentials(BaseModel):
 admin_sessions = {}
 
 # Groq API setup
-os.environ["GROQ_API_KEY"] = "your api key here"
+os.environ["GROQ_API_KEY"] = "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"
 
 def groq_response(user_input):
     api_key = os.environ.get("GROQ_API_KEY")
@@ -96,13 +96,28 @@ def predict_intent(user_input):
     return intent_label, confidence
 
 @app.post("/chatbot")
+@app.post("/chatbot")
 def chatbot(request: ChatRequest):
     user_input = request.message.strip()
 
+    # Explicit check for admin login command
     if user_input == "./dev":
         return {"response": "Enter admin username and password as 'username,password'."}
 
-    if "," in user_input:
+    # Predict intent first before checking for comma
+    intent_label, confidence = predict_intent(user_input)
+
+    # If confidence is high, return intent-based response
+    CONFIDENCE_THRESHOLD = 0.99555
+    if confidence >= CONFIDENCE_THRESHOLD:
+        response = next(
+            (random.choice(intent['responses']) for intent in data['intents'] if intent['intent'] == intent_label),
+            "I'm sorry, I don't have an answer for that."
+        )
+        return {"response": response}
+
+    # Admin login logic only if explicitly entered after "./dev"
+    if "," in user_input and " " not in user_input:
         username, password = user_input.split(",", 1)
         admin = admin_collection.find_one({"username": username, "password": password})
         if admin:
@@ -111,28 +126,14 @@ def chatbot(request: ChatRequest):
         else:
             return {"response": "Invalid admin credentials."}
 
-    if user_input.lower() == "view prompts":
-        for username in admin_sessions:
-            if admin_sessions.get(username, False):
-                prompts = list(prompts_collection.find({}, {"_id": 0, "prompt": 1}))
-                return {"response": prompts}
-        return {"response": "You must log in as an admin."}
+    # If confidence is low, use Groq API for response
+    try:
+        response = groq_response(user_input)
+    except Exception:
+        response = "I'm sorry, I couldn't process your question."
 
-    CONFIDENCE_THRESHOLD = 0.99555
-    prompts_collection.insert_one({"prompt": user_input})
-    intent_label, confidence = predict_intent(user_input)
-
-    if confidence < CONFIDENCE_THRESHOLD:
-        try:
-            response = groq_response(user_input)
-        except Exception:
-            response = "I'm sorry, I couldn't process your question."
-    else:
-        response = next(
-            (random.choice(intent['responses']) for intent in data['intents'] if intent['intent'] == intent_label),
-            "I'm sorry, I don't have an answer for that."
-        )
     return {"response": response}
+
 
 @app.post("/admin/login")
 def admin_login(credentials: AdminCredentials):
@@ -151,7 +152,7 @@ def get_prompts(username: str, password: str):
     return {"prompts": prompts}
 
 # Expose FastAPI with ngrok
-ngrok.set_auth_token("api key here")
+ngrok.set_auth_token("2qfmcYifn6s6LPsgpSyj4GH1eM1_2F3NQNuZ7KUqjsEjHTwH")
 public_url = ngrok.connect(8000)
 print(f"Public URL: {public_url}")
 
