@@ -59,7 +59,7 @@ Welcome to the documentation for our advanced Chatbot V4.0! This chatbot is desi
    - Update the chatbot configuration with the Ngrok URL.
 
 5. Run the chatbot:
-   - you have to run ```bash python step1.py ``` for once as it will train the  model and save it in your local after that run 
+   - you have to run ``` python step1.py ``` for once as it will train the  model and save it in your local after that run 
    ```bash
    python step2.py
    ```
