@@ -3,34 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Interface</title>
-    <!-- Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- Anime.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <!-- GSAP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <title>Chatbot UI</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-100">
+<body>
+    <!-- Chatbot Icon -->
+    <div class="chatbot-icon" id="chatbot-icon">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Chatbot Icon">
+    </div>
+
     <!-- Chatbot Container -->
-    <div id="chatbot-container" class="fixed bottom-4 right-4 w-96 bg-white rounded-lg shadow-lg transform transition-all duration-300 ease-in-out">
-        <!-- Chatbot Header -->
-        <div class="flex justify-between items-center p-4 bg-blue-500 text-white rounded-t-lg">
-            <h2 class="text-lg font-semibold">Chatbot</h2>
-            <button id="minimize-btn" class="p-1 hover:bg-blue-600 rounded">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" />
-                </svg>
-            </button>
+    <div class="chatbot-container" id="chatbot-container" >
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="header-left">
+                <span class="chat-title">Chat Support</span>
+                <span class="chat-subtitle">We're here to help!</span>
+            </div>
+            <button class="close-btn" id="close-btn">&times;</button>
         </div>
-        <!-- Chatbot Messages -->
-        <div id="chatbot-messages" class="p-4 h-64 overflow-y-auto bg-gray-50">
-            <!-- Messages will appear here -->
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="chat-messages">
+            <div class="bot-message">
+                <p>Hello! How can we assist you today?</p>
+            </div>
         </div>
-        <!-- Chatbot Input -->
-        <div class="flex p-4 bg-gray-100 rounded-b-lg">
-            <input type="text" id="user-input" placeholder="Type your message here..." class="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button id="send-btn" class="p-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600">Send</button>
+
+        <!-- Chat Input -->
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type your message..."  >
+            <button id="send-btn">&#10148;</button>
         </div>
     </div>
 

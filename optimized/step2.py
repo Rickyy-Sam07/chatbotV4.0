@@ -74,17 +74,29 @@ def groq_response(user_input):
     client = Groq(api_key=api_key)
     system_prompt = {
         "role": "assistant",
-        "content": "You are a helpful assistant. The college name is IEM Kolkata. Provide relevant answers."
+        "content": (
+            "You are a helpful assistant for IEM Kolkata. "
+            "You can assist with queries related to admissions, courses, faculty, campus facilities, and other college-related information. "
+            "For any question outside of these topics, reply with: 'Sorry, we are unable to give you the answer at this moment.' "
+            "Do not provide unasked data or go off-topic. Stick to college-related queries only. "
+            "Always format your response in HTML for a website. Use <strong> for bold text, <ul> and <li> for lists, and <br> for line breaks."
+        )
     }
 
     chat_history = [system_prompt, {"role": "user", "content": user_input}]
     response = client.chat.completions.create(
         model="llama3-70b-8192",
         messages=chat_history,
-        max_tokens=250,
+        max_tokens=450,
         temperature=1.2
     )
-    return response.choices[0].message.content
+
+    # Ensure the response is in HTML format
+    response_text = response.choices[0].message.content
+    if not any(tag in response_text for tag in ['<strong>', '<ul>', '<li>', '<br>']):
+        response_text = convert_to_html(response_text)
+
+    return response_text
 
 def predict_intent(user_input):
     encoded_input = tokenizer.texts_to_sequences([user_input])
@@ -95,8 +107,98 @@ def predict_intent(user_input):
     intent_label = le.inverse_transform([intent_idx])[0]
     return intent_label, confidence
 
+from datetime import datetime
+
+def save_prompt(user_input):
+    try:
+        prompt_data = {
+            "prompt": user_input,
+            "timestamp": datetime.now()
+        }
+        prompts_collection.insert_one(prompt_data)
+        print(f"Prompt saved: {user_input}")
+    except Exception as e:
+        print(f"Error saving prompt: {e}")
+
+def convert_to_html(text):
+    """
+    Convert plain text with markdown-like syntax to HTML.
+    """
+    # Replace **text** with <strong>text</strong>
+    text = text.replace('**', '<strong>', 1)
+    text = text.replace('**', '</strong>', 1)
+
+    # Replace * text with <li>text</li>
+    lines = text.split('\n')
+    html_lines = []
+    for line in lines:
+        if line.strip().startswith('* '):
+            line = f"<li>{line[2:].strip()}</li>"
+        html_lines.append(line)
+    text = '\n'.join(html_lines)
+
+    # Wrap lists in <ul> tags
+    if '<li>' in text:
+        text = text.replace('<li>', '<ul><li>', 1)
+        text = text.replace('</li>', '</li></ul>', text.count('</li>') - 1)
+
+    # Replace line breaks with <br> tags
+    text = text.replace('\n', '<br>')
+
+    return text
+
+
 @app.post("/chatbot")
-@app.post("/chatbot")
+def chatbot(request: ChatRequest):
+    user_input = request.message.strip()
+
+    # Save the user's prompt to the database
+    save_prompt(user_input)
+
+    # Explicit check for admin login command
+    if user_input == "./dev":
+        return {"response": "Enter admin username and password as 'username,password'."}
+
+    # Predict intent first before checking for comma
+    intent_label, confidence = predict_intent(user_input)
+
+    # If confidence is high, return intent-based response
+    CONFIDENCE_THRESHOLD = 0.99555
+    if confidence >= CONFIDENCE_THRESHOLD:
+        response = next(
+            (random.choice(intent['responses']) for intent in data['intents'] if intent['intent'] == intent_label),
+            "I'm sorry, I don't have an answer for that."
+        )
+        # Ensure the response is in HTML format
+        if not any(tag in response for tag in ['<strong>', '<ul>', '<li>', '<br>']):
+            response = convert_to_html(response)
+        return {"response": response}
+
+    # Admin login logic only if explicitly entered after "./dev"
+    if "," in user_input and " " not in user_input:
+        username, password = user_input.split(",", 1)
+        admin = admin_collection.find_one({"username": username, "password": password})
+        if admin:
+            admin_sessions[username] = True
+            return {"response": "Login successful."}
+        else:
+            return {"response": "Invalid admin credentials."}
+        
+    if user_input.lower() == "view prompts":
+        for username in admin_sessions:
+            if admin_sessions.get(username, False):
+                prompts = list(prompts_collection.find({}, {"_id": 0, "prompt": 1}))
+                return {"response": prompts}
+        return {"response": "You must log in as an admin to view prompts."}
+
+    # If confidence is low, use Groq API for response
+    try:
+        response = groq_response(user_input)
+    except Exception:
+        response = "I'm sorry, I couldn't process your question."
+
+    return {"response": response}
+
 def chatbot(request: ChatRequest):
     user_input = request.message.strip()
 
@@ -125,6 +227,13 @@ def chatbot(request: ChatRequest):
             return {"response": "Login successful."}
         else:
             return {"response": "Invalid admin credentials."}
+        
+    if user_input.lower() == "view prompts":
+        for username in admin_sessions:
+            if admin_sessions.get(username, False):
+                prompts = list(prompts_collection.find({}, {"_id": 0, "prompt": 1}))
+                return {"response": prompts}
+        return {"response": "You must log in as an admin to view prompts."}
 
     # If confidence is low, use Groq API for response
     try:

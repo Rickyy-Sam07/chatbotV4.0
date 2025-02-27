@@ -263,7 +263,7 @@ def get_prompts(username: str, password: str):
 
 
 # Expose FastAPI with ngrok
-ngrok.set_auth_token("2qfmcYifn6s6LPsgpSyj4GH1eM1_2F3NQNuZ7KUqjsEjHTwH")  # Replace with your ngrok auth token
+ngrok.set_auth_token("")  # Replace with your ngrok auth token
 public_url = ngrok.connect(8000)
 print(f"Public URL: {public_url}")
 
