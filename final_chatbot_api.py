@@ -125,7 +125,7 @@ le = LabelEncoder()
 le.fit(intents)
 
 # Groq API key setup
-os.environ["GROQ_API_KEY"] = "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"
+os.environ["GROQ_API_KEY"] = "your key----------"
 
 # Define chatbot response functions
 def groq_response(user_input):
