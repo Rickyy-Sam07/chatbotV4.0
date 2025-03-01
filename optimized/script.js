@@ -26,7 +26,7 @@ async function sendMessage() {
 
     // API integration with interface
     try {
-        const response = await fetch('https://6c00-2409-40e0-3a-2525-c46e-4089-c3e6-3785.ngrok-free.app/chatbot', {
+        const response = await fetch('https://e8ab-2409-40e0-2b-64f4-e531-7cb0-cdea-6620.ngrok-free.app/chatbot', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

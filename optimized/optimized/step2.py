@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from pymongo import MongoClient
 from groq import Groq
 import uvicorn
-#from pyngrok import ngrok
+from pyngrok import ngrok
 import nest_asyncio
 
 # Load trained model
@@ -261,9 +261,9 @@ def get_prompts(username: str, password: str):
     return {"prompts": prompts}
 
 # Expose FastAPI with ngrok
-'''ngrok.set_auth_token("2qfmcYifn6s6LPsgpSyj4GH1eM1_2F3NQNuZ7KUqjsEjHTwH")
+ngrok.set_auth_token("2qfmcYifn6s6LPsgpSyj4GH1eM1_2F3NQNuZ7KUqjsEjHTwH")
 public_url = ngrok.connect(8000)
 print(f"Public URL: {public_url}")
 
-nest_asyncio.apply()'''
+nest_asyncio.apply()
 uvicorn.run(app, host="0.0.0.0", port=8000)
